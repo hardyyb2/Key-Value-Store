@@ -1,7 +1,19 @@
 {
-  "name": "Freshworks",
+  "name": "freshworks",
   "version": "1.0.0",
   "main": "index.js",
   "author": "hardyyb2 <hardikb3732@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
 }
