@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Files and other imports
-const test = require("./routes/test");
+const StoreRoutes = require("./routes/storeRoutes");
 const ErrorHandler = require("./middlewares/errorHandler");
 
 // Configurations
@@ -34,7 +34,7 @@ app.use(
 );
 
 // Using Routers
-app.use("/api/v1/test", test);
+app.use("/api/v1/store", StoreRoutes);
 
 // Error Handler
 app.use(ErrorHandler);
