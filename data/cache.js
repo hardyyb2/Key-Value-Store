@@ -1,0 +1,41 @@
+class LRUCache {
+  constructor(capacity) {
+    this.cache = new Map();
+    this.capacity = capacity;
+  }
+
+  exists(key) {
+    if (this.cache.get(key)) {
+      return true;
+    }
+    return false;
+  }
+
+  add(key, value) {
+    this.cache.delete(key);
+
+    this.cache.set(key, value);
+
+    if (this.cache.size > this.capacity) {
+      this.cache.delete(this.cache.keys().next().value);
+    }
+  }
+
+  get(key) {
+    if (!this.cache.has(key)) return -1;
+
+    let val = this.cache.get(key);
+    this.cache.delete(key);
+    this.cache.set(key, val);
+
+    return this.cache.get(key);
+  }
+
+  delete(key) {
+    this.cache.delete(key);
+  }
+}
+
+const cache = new LRUCache();
+
+module.exports = cache;
