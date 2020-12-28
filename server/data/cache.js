@@ -13,10 +13,10 @@ class LRUCache {
     return false;
   }
 
-  add(key, value) {
+  add(key, val, expires) {
     this.cache.delete(key);
 
-    this.cache.set(key, value);
+    this.cache.set(key, { val, expires });
 
     if (this.cache.size > this.capacity) {
       this.cache.delete(this.cache.keys().next().value);

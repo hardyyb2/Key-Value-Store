@@ -44,10 +44,10 @@ class StoreClient {
     return this.request(`/${key}`, options);
   }
 
-  createKey(key, val) {
+  createKey(key, val, ttl) {
     const options = {
       method: "post",
-      data: JSON.stringify({ key, val }),
+      data: JSON.stringify({ key, val, ttl }),
     };
     return this.request("", options);
   }

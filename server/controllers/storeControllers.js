@@ -18,7 +18,7 @@ const messages = {
 const PATH_TO_FILE = path.join(__dirname, "../data/data");
 
 const CreateKeyVal = asyncHandler(async (req, res, next) => {
-  const { key, val } = req.body;
+  const { key, val, ttl = -1 } = req.body;
 
   if (!key) {
     return next(new ErrorResponse("Please Provide a Key", 400));
@@ -28,8 +28,33 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
 
   const existsInCache = cache.exists(key);
 
+  console.log(ttl);
+  const expires = ttl === -1 ? -1 : Date.now() + ttl * 1000;
+
   if (existsInCache) {
-    return send(res, 400, messages.ALREADY_EXISTS);
+    let oldVal = cache.get(key);
+
+    if (oldVal.expires > Date.now() || oldVal.expires === -1) {
+      return send(res, 400, messages.ALREADY_EXISTS);
+    } else {
+      checkFileExistsElseCreate(PATH_TO_FILE);
+
+      let { data, success } = await readFile(PATH_TO_FILE);
+
+      if (!success) {
+        return next(new ErrorResponse("Server Error, Please try again", 500));
+      }
+
+      if (data) {
+        data = JSON.parse(data);
+      } else {
+        data = {};
+      }
+      data[key] = { val, expires };
+      cache.delete(key);
+      cache.add(key, val, expires);
+      return send(res, 201, messages.CREATED_KEY);
+    }
   } else {
     checkFileExistsElseCreate(PATH_TO_FILE);
 
@@ -48,11 +73,17 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
     const existsInFile = data[key];
 
     if (existsInFile) {
-      cache.add(key, val);
-      return next(new ErrorResponse("Already Exists", 400));
+      if (existsInFile.expires > Date.now() || existsInFile.expires === -1) {
+        cache.add(key, val, expires);
+        return next(new ErrorResponse("Already Exists", 400));
+      } else {
+        data[key] = { val, expires };
+        cache.add(key, val, expires);
+        return send(res, 201, messages.CREATED_KEY);
+      }
     }
 
-    data[key] = val;
+    data[key] = { val, expires };
     success = await writeToFile(PATH_TO_FILE, data);
 
     if (!success) {
@@ -74,7 +105,37 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
 
   if (existsInCache) {
     const val = cache.get(key);
-    return send(res, 200, { key, val });
+    let expires = val.expires;
+
+    if (expires > Date.now() || expires === -1) {
+      return send(res, 200, { key, val });
+    } else {
+      checkFileExistsElseCreate(PATH_TO_FILE);
+
+      let { data, success } = await readFile(PATH_TO_FILE);
+
+      if (!success) {
+        return next(new ErrorResponse("Server Error, Please try again", 500));
+      }
+
+      if (data) {
+        data = JSON.parse(data);
+      } else {
+        data = {};
+      }
+
+      if (data.hasOwnProperty(key)) {
+        delete data[key];
+        const success = await writeToFile(PATH_TO_FILE, data);
+
+        if (!success) {
+          return next(new ErrorResponse("Server Error, Please try again", 500));
+        }
+        cache.delete(key);
+        return send(res, 404, messages.NOT_FOUND);
+      }
+      return send(res, 404, messages.NOT_FOUND);
+    }
   } else {
     checkFileExistsElseCreate(PATH_TO_FILE);
 
@@ -91,8 +152,13 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
     }
 
     if (data.hasOwnProperty(key)) {
-      cache.add(key, data[key]);
-      return send(res, 200, { key, val: data[key] });
+      if (data[key].expires > Date.now() || data[key].expires === -1) {
+        cache.add(key, data[key]);
+        return send(res, 200, { key, val: data[key] });
+      } else {
+        delete data[key];
+        return send(res, 404, messages.NOT_FOUND);
+      }
     } else {
       return send(res, 404, messages.NOT_FOUND);
     }
@@ -121,13 +187,14 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
 
   if (data.hasOwnProperty(key)) {
     delete data[key];
-    cache.delete(key);
 
     const success = await writeToFile(PATH_TO_FILE, data);
 
     if (!success) {
       return next(new ErrorResponse("Server Error, Please try again", 500));
     }
+    cache.delete(key);
+
     return send(res, 200, { message: messages.DELETED_KEY });
   } else {
     const existsInCache = cache.exists(key);
@@ -136,7 +203,7 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
       cache.delete(key);
     }
 
-    return send(res, 404, { message: messages.NOT_FOUND });
+    return send(res, 404, messages.NOT_FOUND);
   }
 });
 
