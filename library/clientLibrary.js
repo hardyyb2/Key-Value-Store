@@ -3,11 +3,10 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const BASE_PATH = `http://localhost:3000/api/v1/store`;
+const BASE_PATH = process.env.BASE_PATH || `http://localhost:3000/api/v1/store`;
 
 class StoreClient {
   constructor() {
-    // this.basePath = process.env.BASE_PATH;
     this.basePath = BASE_PATH;
   }
 

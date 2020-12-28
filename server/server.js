@@ -34,7 +34,9 @@ app.use(
 );
 
 // Using Routers
-app.use("/api/v1/store", StoreRoutes);
+const API_ROUTE = process.env.API_ROUTE || `/api/v1`;
+
+app.use(`${API_ROUTE}/store`, StoreRoutes);
 
 // Error Handler
 app.use(ErrorHandler);
