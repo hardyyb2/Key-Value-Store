@@ -6,6 +6,7 @@ const ErrorResponse = require("../utils/errorResponse");
 
 const cache = require("../data/cache");
 const { readFile, writeToFile } = require("../utils/fileOperations");
+const checkFileExistsElseCreate = require("../utils/checkFileExists");
 
 const messages = {
   CREATED_KEY: "Created Key",
@@ -30,6 +31,8 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
   if (existsInCache) {
     return send(res, 400, messages.ALREADY_EXISTS);
   } else {
+    checkFileExistsElseCreate(PATH_TO_FILE);
+
     let { data, success } = await readFile(PATH_TO_FILE);
 
     if (!success) {
@@ -73,6 +76,8 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
     const val = cache.get(key);
     return send(res, 200, { key, val });
   } else {
+    checkFileExistsElseCreate(PATH_TO_FILE);
+
     let { data, success } = await readFile(PATH_TO_FILE);
 
     if (!success) {
@@ -100,6 +105,7 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
   if (!key) {
     return next(new ErrorResponse("Please Provide a Key", 400));
   }
+  checkFileExistsElseCreate(PATH_TO_FILE);
 
   let { data, success } = await readFile(PATH_TO_FILE);
 

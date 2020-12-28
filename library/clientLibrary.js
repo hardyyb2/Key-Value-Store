@@ -30,7 +30,9 @@ class StoreClient {
         return res.data;
       })
       .catch((err) => {
-        return err.response.data;
+        if (err.response && err.response.data) return err.response.data;
+        else if (err.response) return err.response;
+        else return err;
       });
   }
 
