@@ -11,7 +11,6 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "isomorphic-unfetch": "^3.1.0",
     "morgan": "^1.10.0",
     "mz": "^2.7.0"
   },

@@ -1,4 +1,4 @@
-const fetch = require("isomorphic-unfetch");
+const axios = require("axios");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -12,25 +12,31 @@ class StoreClient {
 
   request(endpoint = "", options = {}) {
     let url = this.basePath + endpoint;
-
     let headers = {
-      api_key: this.api_key,
+      Accept: "application/json",
       "Content-type": "application/json",
     };
 
     let config = {
       ...options,
-      ...headers,
+      headers,
     };
 
-    return fetch(url, config).then((r) => {
-      return r.json();
-    });
+    return axios({
+      url,
+      ...config,
+    })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err.response.data;
+      });
   }
 
   getKey(key) {
     const options = {
-      method: "GET",
+      method: "get",
     };
 
     return this.request(`/${key}`, options);
@@ -38,15 +44,15 @@ class StoreClient {
 
   createKey(key, val) {
     const options = {
-      method: "POST",
-      body: JSON.stringify({ key, val }),
+      method: "post",
+      data: JSON.stringify({ key, val }),
     };
     return this.request("", options);
   }
 
   deleteKey(key) {
     const options = {
-      method: "DELETE",
+      method: "delete",
     };
     return this.request(`/${key}`, options);
   }

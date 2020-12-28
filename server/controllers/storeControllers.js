@@ -56,8 +56,6 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse("Server Error, Please try again", 500));
     }
 
-    console.log(cache, data);
-
     return send(res, 201, messages.CREATED_KEY);
   }
 });
@@ -87,8 +85,6 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
       data = {};
     }
 
-    console.log(cache, data);
-
     if (data.hasOwnProperty(key)) {
       cache.add(key, data[key]);
       return send(res, 200, { key, val: data[key] });
@@ -116,8 +112,6 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
   } else {
     data = {};
   }
-
-  console.log(cache, data);
 
   if (data.hasOwnProperty(key)) {
     delete data[key];
