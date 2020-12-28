@@ -1,9 +1,14 @@
 const fetch = require("isomorphic-unfetch");
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+const BASE_PATH = `http://localhost:3000/api/v1/store`;
 
 class StoreClient {
   constructor() {
-    this.basePath = process.env.BASE_PATH;
+    // this.basePath = process.env.BASE_PATH;
+    this.basePath = BASE_PATH;
   }
 
   request(endpoint = "", options = {}) {
@@ -20,20 +25,16 @@ class StoreClient {
     };
 
     return fetch(url, config).then((r) => {
-      if (r.ok) {
-        return r.json();
-      }
-      throw new Error(r);
+      return r.json();
     });
   }
 
   getKey(key) {
     const options = {
       method: "GET",
-      body: JSON.stringify({ key }),
     };
 
-    return this.request("", options);
+    return this.request(`/${key}`, options);
   }
 
   createKey(key, val) {
@@ -47,14 +48,9 @@ class StoreClient {
   deleteKey(key) {
     const options = {
       method: "DELETE",
-      body: JSON.stringify({ key }),
     };
-    return this.request("", options);
+    return this.request(`/${key}`, options);
   }
 }
-
-const client = new StoreClient();
-
-client.getKey("a");
 
 module.exports = StoreClient;
