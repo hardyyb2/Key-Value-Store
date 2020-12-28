@@ -28,7 +28,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
   const existsInCache = cache.exists(key);
 
   if (existsInCache) {
-    return send(res, 400, { message: messages.ALREADY_EXISTS });
+    return send(res, 400, messages.ALREADY_EXISTS);
   } else {
     let { data, success } = await readFile(PATH_TO_FILE);
 
