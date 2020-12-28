@@ -1,3 +1,5 @@
+const CACHE_SIZE = 40;
+
 class LRUCache {
   constructor(capacity) {
     this.cache = new Map();
@@ -36,6 +38,6 @@ class LRUCache {
   }
 }
 
-const cache = new LRUCache();
+const cache = new LRUCache(CACHE_SIZE);
 
 module.exports = cache;
