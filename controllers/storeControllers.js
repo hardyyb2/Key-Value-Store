@@ -11,6 +11,7 @@ const messages = {
   CREATED_KEY: "Created Key",
   DELETED_KEY: "Deleted Key",
   ALREADY_EXISTS: "Already Exists",
+  NOT_FOUND: "Not Found",
 };
 
 const PATH_TO_FILE = path.join(__dirname, "../data/data");
@@ -24,10 +25,10 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Please Provide a Value for the Key", 400));
   }
 
-  const existsInCache = cache.exists();
+  const existsInCache = cache.exists(key);
 
   if (existsInCache) {
-    send(res, 400, { message: messages.ALREADY_EXISTS });
+    return send(res, 400, { message: messages.ALREADY_EXISTS });
   } else {
     let { data, success } = await readFile(PATH_TO_FILE);
 
@@ -66,12 +67,31 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Please Provide a Key", 400));
   }
 
-  const data = {
-    key,
-    val: cache.get(key),
-  };
+  const existsInCache = cache.exists(key);
 
-  send(res, 200, data);
+  if (existsInCache) {
+    const val = cache.get(key);
+    return send(res, 200, { key, val });
+  } else {
+    let { data, success } = await readFile(PATH_TO_FILE);
+
+    if (!success) {
+      return next(new ErrorResponse("Server Error, Please try again", 500));
+    }
+
+    if (data) {
+      data = JSON.parse(data);
+    } else {
+      data = {};
+    }
+
+    if (data.hasOwnProperty(key)) {
+      cache.add(key, data[key]);
+      return send(res, 200, { key, val: data[key] });
+    } else {
+      return send(res, 404, messages.NOT_FOUND);
+    }
+  }
 });
 
 const DeleteKeyVal = asyncHandler(async (req, res, next) => {
