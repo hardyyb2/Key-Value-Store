@@ -63,7 +63,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
 });
 
 const ReadKeyVal = asyncHandler(async (req, res, next) => {
-  const { key } = req.body;
+  const { key } = req.params;
 
   if (!key) {
     return next(new ErrorResponse("Please Provide a Key", 400));
@@ -99,7 +99,7 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
 });
 
 const DeleteKeyVal = asyncHandler(async (req, res, next) => {
-  const { key } = req.body;
+  const { key } = req.params;
 
   if (!key) {
     return next(new ErrorResponse("Please Provide a Key", 400));
