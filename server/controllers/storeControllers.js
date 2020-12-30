@@ -1,13 +1,15 @@
 const path = require("path");
 
-const asyncHandler = require("../middlewares/asyncHandler");
-const send = require("../utils/Send");
-const ErrorResponse = require("../utils/errorResponse");
-
 const cache = require("../data/cache");
-const { readFile, writeToFile } = require("../utils/fileOperations");
-const checkFileExistsElseCreate = require("../utils/checkFileExists");
-const messages = require("../utils/messages");
+const { asyncHandler } = require("../middlewares");
+
+const {
+  readFile,
+  writeToFile,
+  errorResponse,
+  messages,
+  send,
+} = require("../utils");
 
 const PATH_TO_FILE = path.join(__dirname, "../data/data");
 
@@ -15,9 +17,9 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
   const { key, val, ttl = -1 } = req.body;
 
   if (!key) {
-    return next(new ErrorResponse(messages.PROVIDE_KEY, 400));
+    return next(new errorResponse(messages.PROVIDE_KEY, 400));
   } else if (!val) {
-    return next(new ErrorResponse(messages.PROVIDE_VALUE, 400));
+    return next(new errorResponse(messages.PROVIDE_VALUE, 400));
   }
 
   const existsInCache = cache.exists(key);
@@ -36,7 +38,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
       let { data, success } = await readFile(PATH_TO_FILE);
 
       if (!success) {
-        return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+        return next(new errorResponse(messages.SERVER_ERROR, 500));
       }
 
       if (data) {
@@ -55,7 +57,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
     let { data, success } = await readFile(PATH_TO_FILE);
 
     if (!success) {
-      return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+      return next(new errorResponse(messages.SERVER_ERROR, 500));
     }
 
     if (data) {
@@ -69,7 +71,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
     if (existsInFile) {
       if (existsInFile.expires > Date.now() || existsInFile.expires === -1) {
         cache.add(key, val, expires);
-        return next(new ErrorResponse(messages.ALREADY_EXISTS, 400));
+        return next(new errorResponse(messages.ALREADY_EXISTS, 400));
       } else {
         data[key] = { val, expires };
         cache.add(key, val, expires);
@@ -81,7 +83,7 @@ const CreateKeyVal = asyncHandler(async (req, res, next) => {
     success = await writeToFile(PATH_TO_FILE, data);
 
     if (!success) {
-      return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+      return next(new errorResponse(messages.SERVER_ERROR, 500));
     }
 
     return send(res, 201, messages.CREATED_KEY);
@@ -92,7 +94,7 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
   const { key } = req.params;
 
   if (!key) {
-    return next(new ErrorResponse(messages.PROVIDE_KEY, 400));
+    return next(new errorResponse(messages.PROVIDE_KEY, 400));
   }
 
   const existsInCache = cache.exists(key);
@@ -109,7 +111,7 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
       let { data, success } = await readFile(PATH_TO_FILE);
 
       if (!success) {
-        return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+        return next(new errorResponse(messages.SERVER_ERROR, 500));
       }
 
       if (data) {
@@ -123,7 +125,7 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
         const success = await writeToFile(PATH_TO_FILE, data);
 
         if (!success) {
-          return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+          return next(new errorResponse(messages.SERVER_ERROR, 500));
         }
         cache.delete(key);
         return send(res, 404, messages.NOT_FOUND);
@@ -136,7 +138,7 @@ const ReadKeyVal = asyncHandler(async (req, res, next) => {
     let { data, success } = await readFile(PATH_TO_FILE);
 
     if (!success) {
-      return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+      return next(new errorResponse(messages.SERVER_ERROR, 500));
     }
 
     if (data) {
@@ -163,14 +165,14 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
   const { key } = req.params;
 
   if (!key) {
-    return next(new ErrorResponse(messages.PROVIDE_KEY, 400));
+    return next(new errorResponse(messages.PROVIDE_KEY, 400));
   }
   checkFileExistsElseCreate(PATH_TO_FILE);
 
   let { data, success } = await readFile(PATH_TO_FILE);
 
   if (!success) {
-    return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+    return next(new errorResponse(messages.SERVER_ERROR, 500));
   }
 
   if (data) {
@@ -185,7 +187,7 @@ const DeleteKeyVal = asyncHandler(async (req, res, next) => {
     const success = await writeToFile(PATH_TO_FILE, data);
 
     if (!success) {
-      return next(new ErrorResponse(messages.SERVER_ERROR, 500));
+      return next(new errorResponse(messages.SERVER_ERROR, 500));
     }
     cache.delete(key);
 

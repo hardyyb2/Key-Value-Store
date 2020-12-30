@@ -8,7 +8,7 @@ const path = require("path");
 
 // Files and other imports
 const StoreRoutes = require("./routes/storeRoutes");
-const ErrorHandler = require("./middlewares/errorHandler");
+const { errorHandler } = require("./middlewares");
 
 // Configurations
 dotenv.config();
@@ -39,7 +39,7 @@ const API_ROUTE = process.env.API_ROUTE || `/api/v1`;
 app.use(`${API_ROUTE}/store`, StoreRoutes);
 
 // Error Handler
-app.use(ErrorHandler);
+app.use(errorHandler);
 
 // Starting Server
 const server = app.listen(PORT, (err) => {

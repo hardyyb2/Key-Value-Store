@@ -1,10 +1,8 @@
 const router = require("express").Router();
 
-const {
-  ReadKeyVal,
-  CreateKeyVal,
-  DeleteKeyVal,
-} = require("../controllers/storeControllers");
+const { storeControllers } = require("../controllers");
+
+const { ReadKeyVal, CreateKeyVal, DeleteKeyVal } = storeControllers;
 
 router.route("/").post(CreateKeyVal);
 router.route("/:key").get(ReadKeyVal).delete(DeleteKeyVal);
