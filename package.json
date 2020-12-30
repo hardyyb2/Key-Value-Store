@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cd server && yarn start",
-    "dev" : "cd server && yarn dev"
+    "dev" : "cd server && yarn dev",
+    "setup" :"cd server && yarn && cd ../library && yarn"
   },
   "repository": {
     "type": "git",
